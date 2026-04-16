@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>슥균맨 확률 및 룰</title>
+  <style>
+    body {
+      font-family: "Nanum Gothic", Arial, sans-serif;
+      color: #f8f9fa;
+      background-color: #212529;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      min-height: 100vh;
+      line-height: 1.6;
+      letter-spacing: 0.5px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      color: #f8f9fa;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    #leftContainer,
+    #rightContainer {
+      display: flex;
+      flex-direction: column;
+      width: 400px;
+      margin: 0;
+    }
+
+    #leftPanel,
+    #rightPanel {
+      background-color: #343a40;
+      padding: 20px;
+      border-radius: 10px;
+      height: 800px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      text-align: left;
+      overflow: auto;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    li {
+      margin-bottom: 8px;
+      margin-left: 10px;
+      color: #f8f9fa;
+      white-space: pre-wrap;
+    }
+
+    #gangwonButton {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      background-color: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 16px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #gangwonButton:hover {
+      background-color: #e0a800;
+      transform: scale(1.05);
+    }
+
+    #gangwonButton:active {
+      background-color: #c69500;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #545d66;
+      border: 1px solid #adb5bd;
+      border-radius: 10px;
+      padding: 20px;
+      width: 520px;
+      max-width: 90vw;
+      max-height: 80vh;
+      color: #f8f9fa;
+      text-align: left;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+
+    .modal-content h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+    }
+
+    #gangwonList li {
+      margin-bottom: 10px;
+      margin-left: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      body {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #leftContainer,
+      #rightContainer {
+        width: min(90vw, 700px);
+      }
+
+      #leftPanel,
+      #rightPanel {
+        height: auto;
+        min-height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="leftContainer">
+    <div id="leftPanel">
+      <h2>행복띠 확률</h2>
+      <ul id="happyList"></ul>
+    </div>
+  </div>
+
+  <div id="rightContainer">
+    <div id="rightPanel">
+      <h2>듀얼 컨텐츠 룰</h2>
+      <ul id="ruleList"></ul>
+      <button id="gangwonButton" onclick="openGangwonModal()">강원랜디</button>
+    </div>
+  </div>
+
+  <div id="gangwonModal" class="modal" onclick="closeGangwonModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="close" onclick="closeGangwonModal()">&times;</span>
+      <h2>강원랜디</h2>
+      <ul id="gangwonList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const happyItems = [
+      "어림도 없지!! : 94.0543%",
+      "숙제 : 5.0000%",
+      "☆랜덤초.불.영.제☆ : 0.3000%",
+      "★초월을선택해주세요★ : 0.1000%",
+      "★불멸을선택해주세요★ : 0.1000%",
+      "★영원을선택해주세요★ : 0.1000%",
+      "★제한을선택해주세요★ : 0.1000%",
+      "♡일반게임시참권♡ : 0.1000%",
+      "♥듀얼컨텐츠참여권♥ : 0.0500%",
+      "★☆숙제박스☆★ : 0.0770%",
+      "★★비비영원10강★★ : 0.0025%",
+      "★★전설위습먹기★★ : 0.0025%",
+      "★★지정신비함★★ : 0.0025%",
+      "★★지정초월5세트★★ : 0.0025%",
+      "★★지정불멸5세트★★ : 0.0025%",
+      "★★지정영원5세트★★ : 0.0025%",
+      "★★지정제한5세트★★ : 0.0025%",
+      "★★★지정아이템상위★★★ : 0.0008%",
+      "★★★백숙묵쟈했쟈나★★★ : 0.0003%",
+      "★★★지정특수함★★★ : 0.0001%"
+    ];
+
+    const ruleItems = [
+      "스토리 폭격기전",
+      "원딜전(1물1마)",
+      "4인 강제전",
+      "꼭!가야할캐릭",
+      "기적!신세계보상치기",
+      "지츠'다이스'룰",
+      "변질된 악몽",
+      "녜힁제조기전",
+      "인생의 고도전 (10+0~10+추가1~10)",
+      "신비한이세계전",
+      "너의 상위는..? 0~4",
+      "이캐릭들필수예요(4전설+4히든)",
+      "이캐릭들금지예요(7전설+7히든)",
+      "강원랜디",
+      "개인 미션전",
+      "랜덤 항법전"
+    ];
+
+    const gangwonItems = [
+      "꽝(1불1초1영1제) (0.55%)",
+      "강제상위 (5.85%)",
+      "강제신비함 (5.85%)",
+      "강제전설+히든 (5.85%)",
+      "고유생 상위 (5.85%)",
+      "개인미션 클리어 (5.85%)",
+      "노불노초 (5.85%)",
+      "랜덤항법 (5.85%)",
+      "아이템사용상위 (5.85%)",
+      "전설위습먹기 (5.85%)",
+      "체젠,마나젠,암브,방무 (5.85%)",
+      "토큰 희귀함 먹기 (5.85%)",
+      "포네그리프 해석 (5.85%)",
+      "변이횟수 0~3 (5.85%)",
+      "상위고정 1~4 (5.85%)",
+      "해적선 사용 0~5 (5.85%)",
+      "인생의고도 10~20 (5.85%)",
+      "중도 20~30 (5.85%)"
+    ];
+
+    function renderList(id, items) {
+      const target = document.getElementById(id);
+      target.innerHTML = "";
+
+      items.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        target.appendChild(li);
+      });
+    }
+
+    function openGangwonModal() {
+      document.getElementById("gangwonModal").style.display = "flex";
+    }
+
+    function closeGangwonModal() {
+      document.getElementById("gangwonModal").style.display = "none";
+    }
+
+    window.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        closeGangwonModal();
+      }
+    });
+
+    renderList("happyList", happyItems);
+    renderList("ruleList", ruleItems);
+    renderList("gangwonList", gangwonItems);
+  </script>
+</body>
+</html>
